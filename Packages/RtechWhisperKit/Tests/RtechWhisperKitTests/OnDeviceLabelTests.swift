@@ -2,7 +2,7 @@ import Testing
 
 @testable import RtechWhisperKit
 
-/// On-device takes are labelled and synced as on-device (#492, #493).
+/// On-device takes are labelled and synced as on-device.
 @Suite struct OnDeviceLabelTests {
     @Test func historyProviderFollowsTheSource() {
         #expect(HistoryFormatting.provider(for: .onDevice) == HistoryFormatting.onDeviceProvider)

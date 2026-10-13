@@ -167,7 +167,7 @@ public actor ChatStore: ChatPersisting {
 
     /// Removes the conversation and its messages. When the save fails the
     /// context is replaced, not rolled back: rolling back a delete of a
-    /// conversation with messages traps inside SwiftData (#237), even with
+    /// conversation with messages traps inside SwiftData, even with
     /// the messages deleted one by one. Nothing reached the store, so a
     /// fresh context reads the conversation and its messages as they were.
     public func delete(_ id: UUID) throws {

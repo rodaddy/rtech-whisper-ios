@@ -36,7 +36,7 @@ struct SettingsView: View {
                 } header: {
                     Text("AI")
                 } footer: {
-                    Text("Cleanup tidies each dictation through the hub; titles are written for notes that have none. Read replies aloud speaks each chat reply in Skippy's voice.")
+                    Text("Cleanup tidies each dictation through the hub; titles are written for notes that have none. Read replies aloud speaks each chat reply in the hub's voice.")
                 }
                 Section {
                     Toggle("Start and stop sounds", isOn: $app.audioCuesEnabled)

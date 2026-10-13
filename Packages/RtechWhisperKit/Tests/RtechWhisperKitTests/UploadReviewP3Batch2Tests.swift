@@ -9,7 +9,7 @@ import Testing
 @Suite struct DictationActivityTakesTests {
     private let recording = DictationActivityContent(phase: .recording, startedAt: .now)
 
-    // #159: a request that throws leaves nothing showing, so the next recording starts one.
+    // A request that throws leaves nothing showing, so the next recording starts one.
     @Test func aFailedRequestLetsTheNextRecordingStartAgain() throws {
         let takes = DictationActivityTakes()
         let take = takes.start()
@@ -19,7 +19,7 @@ import Testing
         #expect(DictationActivityStep.plan(isActive: takes.isActive, content: recording) == .start(recording))
     }
 
-    // #159 #204: an old take's late failure or id never reaches a later take.
+    // An old take's late failure or id never reaches a later take.
     @Test func anOldTakeNeverTouchesALaterOne() throws {
         let takes = DictationActivityTakes()
         let first = takes.start()
@@ -35,12 +35,12 @@ import Testing
 
 @MainActor
 @Suite struct UploadReviewP3Batch2Tests {
-    // #203: a 2xx body that did not decode costs one resend, not the pass.
+    // A 2xx body that did not decode costs one resend, not the pass.
     @Test func aBodyThatDidNotDecodeIsResumable() {
         #expect(UploadJob.isResumable(.decoding("unexpected body")))
     }
 
-    // #207: the footer gets plain words; the raw reader error is only logged.
+    // The footer gets plain words; the raw reader error is only logged.
     @Test func aTruncationReasonIsInPlainWords() {
         #expect(UploadJob.truncationReason(for: AudioFileDecoderError.endedEarly)
             == "The file ends before the length it says it has.")

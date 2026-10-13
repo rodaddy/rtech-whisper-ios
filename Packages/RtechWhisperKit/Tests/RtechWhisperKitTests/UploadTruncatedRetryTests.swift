@@ -3,7 +3,7 @@ import Testing
 
 @testable import RtechWhisperKit
 
-// #156: a truncated upload is not complete. It writes no history row, stays
+// A truncated upload is not complete. It writes no history row, stays
 // kept, and the next resumeUnfinished retries it.
 
 private struct Damaged: Error {}

@@ -3,7 +3,7 @@ import Testing
 
 @testable import RtechWhisperKit
 
-/// The "Transcribe on this iPhone" setting (#476).
+/// The "Transcribe on this iPhone" setting.
 @MainActor
 @Suite struct TranscribeOnDeviceTests {
     private func controller(

@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 # Regenerates RtechWhisper.xcodeproj from project.yml, which is the source of
 # truth. The project is gitignored, so run this after a fresh clone and after
 # any change to project.yml.

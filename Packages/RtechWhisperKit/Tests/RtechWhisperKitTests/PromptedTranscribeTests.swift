@@ -17,17 +17,17 @@ private final class PromptSpy: @unchecked Sendable {
 
 @Suite struct PromptedTranscribeTests {
     @MainActor @Test func sendsTheDictionaryHintReadFreshOnEverySend() async throws {
-        let dictionary = DictionaryStore(persistence: InMemoryDictionaryPersistence(words: ["Proxmox"]))
+        let dictionary = DictionaryStore(persistence: InMemoryDictionaryPersistence(words: ["Grafana"]))
         let spy = PromptSpy()
         let transcribe = prompted({ wav, prompt throws(HubError) in spy.send(wav, prompt: prompt) },
                                   hint: { dictionary.promptHint() })
 
         let first = try await transcribe(Data([1]))
         #expect(first.text == "ok")
-        dictionary.add("Caddy")
+        dictionary.add("Kafka")
         _ = try await transcribe(Data([2]))
 
-        #expect(spy.prompts == ["Proxmox", "Proxmox, Caddy"])
+        #expect(spy.prompts == ["Grafana", "Grafana, Kafka"])
     }
 
     @MainActor @Test func anEmptyDictionarySendsNoPrompt() async throws {

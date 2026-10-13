@@ -207,7 +207,7 @@ public final class UploadJob {
         /// so `retrySave` or the next launch saves it again; otherwise the
         /// text on screen is the only copy.
         case notSaved(kept: Bool)
-        /// The file stopped being readable part-way (#156): nothing was saved
+        /// The file stopped being readable part-way: nothing was saved
         /// to the history. `kept` when its checkpoint is kept, so the next
         /// `resumeUnfinished` retries it until it reads to the end or the
         /// user removes it (`reset`).
@@ -240,7 +240,7 @@ public final class UploadJob {
     private let sleep: @Sendable (Duration) async -> Void
     /// Keeps each upload across launches; `nil` keeps it only in memory.
     private let saving: UploadSaving?
-    /// Carries a kept upload's chunks while the app is suspended (#96);
+    /// Carries a kept upload's chunks while the app is suspended;
     /// `nil` sends every chunk through `transcribe`.
     private let background: (any BackgroundTransport)?
 
@@ -674,7 +674,7 @@ public final class UploadJob {
         }
 
         // The audio sent, not the header's length: the reader reads past a
-        // short VBR estimate, and a truncated file stops short of it (#201).
+        // short VBR estimate, and a truncated file stops short of it.
         let duration = Double(pass.sentSamples) / Double(WavEncoder.relaySampleRate)
         let result = UploadResult(
             fileName: pass.fileName, text: UploadChunker.merge(pass.texts),
@@ -682,7 +682,7 @@ public final class UploadJob {
             truncationReason: pass.truncationReason, clientId: pass.saved?.id.uuidString)
         state = .done(result)
         // Not complete: no history row, and kept so the next resumeUnfinished
-        // retries it (#156), unless this retry read no further than the last.
+        // retries it, unless this retry read no further than the last.
         if result.truncated {
             let partial = pass.truncatedAt.map { pass.sentSamples <= $0 } ?? false
             await persist(pass, partial ? .partial : .truncated)
@@ -726,7 +726,7 @@ public final class UploadJob {
 
     /// Why a read stopped part-way, in the user's words: a known reader error
     /// says what went wrong, anything else (an `OSStatus`, say) is general.
-    /// The raw error is logged, not shown (#207).
+    /// The raw error is logged, not shown.
     static func truncationReason(for error: any Error) -> String {
         switch error as? AudioFileDecoderError {
         case .endedEarly: "The file ends before the length it says it has."

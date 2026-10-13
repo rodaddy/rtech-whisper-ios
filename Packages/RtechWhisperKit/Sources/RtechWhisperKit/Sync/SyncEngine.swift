@@ -30,7 +30,7 @@ public final class UserDefaultsCursorStore: CursorStore, @unchecked Sendable {
     /// Cursor format. 1 (no version key) stored the raw pass start; 2 stores
     /// the pass start minus `SyncEngine.lookback`; 3 drops the folder and
     /// note cursors once so the next pull lists every folder tombstone and
-    /// re-serves every note (ios#557).
+    /// re-serves every note.
     public static let formatVersion = 3
     /// Every delta cursor key the sync layer stores.
     static let deltaKeys = [

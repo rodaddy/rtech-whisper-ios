@@ -37,7 +37,7 @@ private struct DeleteRig {
     }
 }
 
-// ios#472: Delete on the dictation card, with a 5 s Undo.
+// Delete on the dictation card, with a 5 s Undo.
 @MainActor
 @Suite("Delete the latest take")
 struct DeleteTakeTests {

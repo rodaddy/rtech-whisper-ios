@@ -11,7 +11,7 @@ import RtechWhisperKit
 /// states arrived when each finishes within the chain's `maxWait`: the launch
 /// clean-up before any start, and a take's update before its end. A stalled
 /// call can still land late, so `update` and `end` touch only the activity
-/// their own take's request started, by the id it stored (#204). `Activity`
+/// their own take's request started, by the id it stored. `Activity`
 /// is not `Sendable`, so each call looks that activity up again inside the
 /// task that awaits it.
 @MainActor
@@ -38,7 +38,7 @@ final class DictationActivity {
                         attributes: DictationActivityAttributes(), content: .init(state: state, staleDate: staleDate)
                     ).id
                 } catch {
-                    // Nothing is showing, so the next recording starts afresh (#159).
+                    // Nothing is showing, so the next recording starts afresh.
                     await takes.requestFailed(take)
                 }
             }

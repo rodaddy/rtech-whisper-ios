@@ -31,7 +31,7 @@ struct ChatConversationView: View {
             if session.messages.isEmpty {
                 ContentUnavailableView(
                     "Ask anything", systemImage: "bubble.left.and.text.bubble.right",
-                    description: Text("Skippy can search your notes, read one, write a new one, or update it."))
+                    description: Text("The assistant can search your notes, read one, write a new one, or update it."))
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) { composer }

@@ -493,11 +493,11 @@ struct NoteToolsR6ReviewFixTests {
     }
 }
 
-/// #234: every chat write carries its own proof of what the model read
+/// Every chat write carries its own proof of what the model read
 /// (the exact current title or content, or text found exactly once in it),
 /// checked by the store against the stored text as it writes.
 @MainActor
-@Suite("Note tools proof of read (#234)")
+@Suite("Note tools proof of read")
 struct NoteToolsProofOfReadTests {
     private static func macEdit(of note: NoteRecord, content: String, at updatedAt: Date) throws -> HubNote {
         HubNote(
@@ -781,7 +781,7 @@ struct NoteToolsProofOfReadTests {
 }
 
 @MainActor
-@Suite("Note tools proof of read, follow-ups (#284 #213 #286 #287 #290)")
+@Suite("Note tools proof of read, follow-ups")
 struct NoteToolsProofOfReadFollowUpTests {
     private static func stored(_ rig: ToolRig, _ id: String) async throws -> NoteRecord {
         try #require(try await rig.store.notes().first { $0.clientId == id })

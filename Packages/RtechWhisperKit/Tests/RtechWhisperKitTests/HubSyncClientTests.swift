@@ -72,7 +72,7 @@ struct HubSyncClientRequestTests {
     @Test func dictionaryBatchCreateWrapsEntriesWithMillisecondTimestamps() async throws {
         let (client, host) = stubbedSync(200, #"{"created":[]}"#)
         let created = try await client.batchCreateDictionary([
-            DictionaryCreateInput(clientDictId: "d-1", word: "Rodaddy", source: "manual", createdAt: t1, updatedAt: t2)
+            DictionaryCreateInput(clientDictId: "d-1", word: "Webpack", source: "manual", createdAt: t1, updatedAt: t2)
         ])
         #expect(created.isEmpty)
         let (request, _, body) = try sent(to: host)

@@ -53,9 +53,9 @@ struct Unreadable: LocalizedError { var errorDescription: String? { "bad header"
 @Suite struct UploadJobTests {
     @Test func oneChunkFileEndsDoneAndReportsOnce() async {
         let relay = RelaySpy([.success(Transcript(text: "hello there", noSpeech: false))])
-        // The header says 3.25 s; 3 s of audio is sent, and that is the length (#201).
+        // The header says 3.25 s; 3 s of audio is sent, and that is the length.
         let audio = DecodedAudio(samples: Array(repeating: 100, count: 16_000 * 3), durationSeconds: 3.25)
-        let job = makeJob(audio: .success(audio), relay: relay, prompt: "Proxmox, Caddy")
+        let job = makeJob(audio: .success(audio), relay: relay, prompt: "Grafana, Kafka")
         var reported: [UploadResult] = []
         job.onTranscribed = { reported.append($0) }
 
@@ -67,7 +67,7 @@ struct Unreadable: LocalizedError { var errorDescription: String? { "bad header"
         #expect(expected.durationMs == 3000)
         #expect(reported == [expected])
         #expect(relay.sent.count == 1)
-        #expect(relay.sent[0].prompt == "Proxmox, Caddy")
+        #expect(relay.sent[0].prompt == "Grafana, Kafka")
         #expect(relay.sent[0].wav.count == WavEncoder.headerLength + 16_000 * 3 * 2)
         #expect(!job.isRunning)
         #expect(job.progress == nil)

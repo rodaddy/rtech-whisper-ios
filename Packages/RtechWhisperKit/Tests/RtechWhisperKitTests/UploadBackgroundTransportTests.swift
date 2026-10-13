@@ -3,7 +3,7 @@ import Testing
 
 @testable import RtechWhisperKit
 
-// #96: a kept upload's chunks go through a background transport.
+// A kept upload's chunks go through a background transport.
 
 /// A background session stand-in: each send is answered later, from a
 /// script by chunk, through `BackgroundAnswers` as the app's delegate would.

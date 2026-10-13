@@ -3,7 +3,7 @@ import Testing
 
 @testable import RtechWhisperKit
 
-// Issue #105: chunks are cut at the quietest point near the limit, and share no audio.
+// chunks are cut at the quietest point near the limit, and share no audio.
 
 /// Loud deterministic noise, with each range in `gaps` set to silence.
 private func noise(count: Int, gaps: [Range<Int>] = []) -> [Int16] {
@@ -45,7 +45,7 @@ private func upload(_ samples: [Int16], maxChunkSeconds: Int) async -> ChunkRela
         let gap = 112_000..<115_200  // 200 ms of silence at 7.0 s.
         let early = 32_000..<35_200  // Quieter still, but before the search: ignored.
         var window = noise(count: 160_000, gaps: [gap, early])
-        // A faint hiss in the late gap, so only the 5 s bound keeps the cut out of the early one (#160).
+        // A faint hiss in the late gap, so only the 5 s bound keeps the cut out of the early one.
         for i in gap { window[i] = i % 2 == 0 ? 50 : -50 }
         let cut = UploadChunker.cutIndex(samples: window, sampleRate: 16_000)
         #expect(gap.contains(cut))

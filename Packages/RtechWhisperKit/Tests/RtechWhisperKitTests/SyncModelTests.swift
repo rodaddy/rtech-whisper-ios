@@ -55,7 +55,7 @@ struct SyncModelTests {
     @Test func dictionaryPageRoundTrips() throws {
         let page = try roundTrip(HubDictionaryPage.self, "dictionary-page")
         #expect(page.hasMore)
-        #expect(page.entries.first?.word == "Rodaddy")
+        #expect(page.entries.first?.word == "Webpack")
         #expect(page.entries.first?.clientDictId == "local-dict-1")
     }
 

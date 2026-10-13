@@ -33,7 +33,7 @@ struct ContentView: View {
     @State private var dumpText = ""
     /// Bumped to focus the Brain dump box when an intent opens it.
     @State private var dumpFocus = 0
-    /// The Brain dump tab's stack, reset when an intent opens the tab (ios#512).
+    /// The Brain dump tab's stack, reset when an intent opens the tab.
     @State private var dumpPath = NavigationPath()
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase

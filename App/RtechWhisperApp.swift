@@ -6,7 +6,7 @@ import UIKit
 
 @main
 struct RtechWhisperApp: App {
-    /// Hands a background relaunch's upload events to the uploader (#96).
+    /// Hands a background relaunch's upload events to the uploader.
     @UIApplicationDelegateAdaptor(UploadAppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     /// Set when the scene goes to the background, so a kept upload is retried
@@ -35,14 +35,14 @@ struct RtechWhisperApp: App {
     @State private var chat: ChatSession
     @State private var chats: ChatConversationsViewModel
     @State private var voiceDraft: VoiceDraft
-    /// The Brain dump tab's mic (ios#484): its own take, never the dictation queue.
+    /// The Brain dump tab's mic: its own take, never the dictation queue.
     @State private var dumpDraft: VoiceDraft
-    /// Reads chat replies aloud in Skippy's voice through the hub (R6).
+    /// Reads chat replies aloud in the hub's voice through the hub.
     @State private var speaker: ReplySpeaker
     /// Start-dictation requests from Siri, Shortcuts, the Action button, and
     /// the Control Center control.
     private let launch: DictationLaunch
-    /// Brain dump requests from the same places (ios#484).
+    /// Brain dump requests from the same places.
     private let dumpLaunch = BrainDumpLaunch()
     /// The Dynamic Island and Lock Screen view of the take in progress: the
     /// phone's version of the desktop floating pill.
@@ -85,7 +85,7 @@ struct RtechWhisperApp: App {
         // the view's task, so an intent that runs before any view still has it.
         // The row is saved before the controller marks the item reported, so
         // a failed save is retried on the next pass instead of lost. The row
-        // is keyed by the queue id, so Delete on the card finds it (#472).
+        // is keyed by the queue id, so Delete on the card finds it.
         dictation.onTranscribed = { [history] item in
             guard let raw = item.whisperText else { return }
             let saved = await history.record(
@@ -133,14 +133,14 @@ struct RtechWhisperApp: App {
                 .environment(noteActions)
                 .environment(speaker)
                 .task { await dictation.start() }
-                // The history is trimmed on this iPhone first (ios#468), then
+                // The history is trimmed on this iPhone first, then
                 // one pass syncs notes, pushes transcriptions, syncs the
                 // dictionary and snippets, and refreshes the history list.
                 .task {
                     await history.applyRetention(appSettings.historyRetention)
                     await history.refresh()
                 }
-                // An upload the last process did not finish carries on from its saved chunks (#86).
+                // An upload the last process did not finish carries on from its saved chunks.
                 .task { await UploadView.inBackgroundTask { await upload.resumeUnfinished() } }
                 .onChange(of: dictation.state) { old, state in
                     activity.apply(state: state, latestText: dictation.latestText)
@@ -154,7 +154,7 @@ struct RtechWhisperApp: App {
             if phase == .active {
                 Task { await dictation.retry() }
                 Task { await history.refresh() }
-                // A kept upload, a truncated one included (#156), is retried on a return from the background too.
+                // A kept upload, a truncated one included, is retried on a return from the background too.
                 if returnsFromBackground {
                     returnsFromBackground = false
                     Task { await UploadView.inBackgroundTask { await upload.resumeUnfinished() } }
@@ -207,7 +207,7 @@ struct RtechWhisperApp: App {
 
     /// One send to the relay. Each send reads the key from the Keychain, so a
     /// key pasted later is picked up without a restart, and the language
-    /// setting (ios#29), so a new choice applies to the next send.
+    /// setting, so a new choice applies to the next send.
     private static func relay(_ appSettings: AppSettingsStore) -> TranscribeWithPrompt {
         let store = KeychainDeviceKeyStore()
         return { wav, prompt throws(HubError) in
@@ -315,7 +315,7 @@ struct RtechWhisperApp: App {
     }
 }
 
-/// The one background upload session (#96), made once so a relaunch's
+/// The one background upload session, made once so a relaunch's
 /// events and the Upload screen share it. Bodies wait in Application Support.
 @MainActor private var sharedUploader: BackgroundUploader?
 

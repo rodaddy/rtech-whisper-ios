@@ -3,7 +3,7 @@ import Testing
 
 @testable import RtechWhisperKit
 
-// Review of PR #551 (P1): a truncated upload whose retry reads no further is
+// A truncated upload whose retry reads no further is
 // not retried again. It is kept as partial: shown from its saved text with no
 // decode, until the user removes it.
 

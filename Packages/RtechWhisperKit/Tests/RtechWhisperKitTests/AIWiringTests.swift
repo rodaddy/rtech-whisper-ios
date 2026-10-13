@@ -167,7 +167,6 @@ struct DictationCleanupTests {
         #expect(reported.first?.cleanedText == nil)
     }
 
-    // #101
     @Test func aTrimOnlyCleanupStoresTheTrimmedText() async throws {
         let scratch = ScratchDirectory()
         let transcript = Transcript(text: "  hello world  ", noSpeech: false)

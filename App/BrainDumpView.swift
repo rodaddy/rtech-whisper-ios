@@ -1,7 +1,7 @@
 import RtechWhisperKit
 import SwiftUI
 
-/// The Brain dump tab (ios#484): type or speak a thought, Save, move on.
+/// The Brain dump tab: type or speak a thought, Save, move on.
 /// Dumps are notes in the "Brain dumps" folder; the Mac sorts them later.
 struct BrainDumpView: View {
     let notes: NotesViewModel
@@ -9,7 +9,7 @@ struct BrainDumpView: View {
     let draft: VoiceDraft
     /// Owned by ContentView, so a take ended in the background still lands here.
     @Binding var text: String
-    /// Owned by ContentView, so the intent can pop back to the box (ios#512).
+    /// Owned by ContentView, so the intent can pop back to the box.
     @Binding var path: NavigationPath
     /// Changes when the Brain dump intent opens the tab: focus the box.
     var focusRequest = 0
@@ -57,7 +57,7 @@ struct BrainDumpView: View {
                 }
             }
             // The box is focused on open, so the keyboard covers the tab bar:
-            // Done and a downward drag put it away (ios#615).
+            // Done and a downward drag put it away.
             .scrollDismissesKeyboard(.interactively)
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {

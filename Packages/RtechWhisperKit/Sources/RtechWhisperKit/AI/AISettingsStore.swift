@@ -15,7 +15,7 @@ public final class AISettingsStore {
         public static let assistantSpeechEnabled = "ai.assistantSpeechEnabled"
     }
 
-    /// Read each chat reply aloud in Skippy's voice. Off by default, as on
+    /// Read each chat reply aloud in the hub's voice. Off by default, as on
     /// the desktop (`assistantSpeechEnabled`).
     public var assistantSpeechEnabled: Bool {
         didSet { defaults.set(assistantSpeechEnabled, forKey: Key.assistantSpeechEnabled) }

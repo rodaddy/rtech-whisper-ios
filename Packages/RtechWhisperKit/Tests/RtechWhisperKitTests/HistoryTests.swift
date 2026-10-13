@@ -66,7 +66,7 @@ final class SyncCounter {
         #expect(history.errorMessage == nil)
     }
 
-    // ios#468: a delete is local only, so it runs no sync pass.
+    // A delete is local only, so it runs no sync pass.
     @Test func deleteRemovesLocallyWithoutSyncing() async throws {
         let store = try TranscriptionStore.inMemory()
         let row = try await store.add(text: "gone", provider: "hub")

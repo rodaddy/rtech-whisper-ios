@@ -19,7 +19,7 @@ public final class LocalTranscription {
     public var status: String
     /// `SyncStatus` raw value, stored as a string so predicates can use it.
     public var syncStatusRaw: String
-    /// Local tombstone left by builds before ios#468, which sent deletes to
+    /// Local tombstone left by older builds, which sent deletes to
     /// the hub. Nothing sets it now; retention hard-deletes such rows.
     public var deletedAt: Date?
     /// The hub's `updated_at` this device last saw.
@@ -108,7 +108,7 @@ public struct TranscriptionRecord: Sendable, Equatable {
 /// The phone's dictation history, with the sync bookkeeping the push needs
 /// (protocol section 7). It holds no network code: `TranscriptionSync` reads
 /// `pending`, pushes, and reports back through `markSynced`. Deletes and
-/// retention are local only (ios#468).
+/// retention are local only.
 @ModelActor
 public actor TranscriptionStore {
     public static let schema = Schema([LocalTranscription.self, RemovedTranscriptionId.self])

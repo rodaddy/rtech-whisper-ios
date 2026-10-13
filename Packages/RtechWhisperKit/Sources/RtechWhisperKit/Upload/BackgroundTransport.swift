@@ -1,6 +1,6 @@
 import Foundation
 
-/// Which request of which kept upload a background task carries (#96). It
+/// Which request of which kept upload a background task carries. It
 /// rides in the task's `taskDescription`, which a background `URLSession`
 /// hands back after a relaunch, so a response maps back to its chunk.
 public struct UploadChunkTag: Hashable, Sendable {

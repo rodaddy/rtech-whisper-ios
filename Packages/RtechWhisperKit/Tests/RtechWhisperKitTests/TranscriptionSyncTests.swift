@@ -7,7 +7,7 @@ private let t0 = Date(timeIntervalSince1970: 1_790_000_000)
 
 /// A hub that serves transcription deltas the way the protocol orders and
 /// filters them (`updated_at > since`, ascending), and records every call.
-/// Since ios#468 the phone only creates, so `listCalls` and `deleteBatches`
+/// The phone only creates, so `listCalls` and `deleteBatches`
 /// must stay empty.
 actor FakeTranscriptionHub: TranscriptionHubSyncing {
     static let writeStamp = t0.addingTimeInterval(500)

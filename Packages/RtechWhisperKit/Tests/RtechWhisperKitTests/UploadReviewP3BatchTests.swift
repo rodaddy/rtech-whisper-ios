@@ -3,7 +3,6 @@ import Testing
 
 @testable import RtechWhisperKit
 
-// Review P3s #141 #143 #146 #147 #148 #154 #162.
 
 /// Loud deterministic noise, with each range in `gaps` set to silence.
 private func noise(count: Int, gaps: [Range<Int>] = []) -> [Int16] {
@@ -55,7 +54,7 @@ private let url = URL(fileURLWithPath: "/audio/long.m4a")
 
 @MainActor
 @Suite struct UploadReviewP3BatchTests {
-    // #143 #154 #147 #162: a chunk longer than the cut search, over ~30 s.
+    // A chunk longer than the cut search, over ~30 s.
     @Test func chunksPartsAndCountFollowWhatIsActuallySent() async throws {
         // Silence 2 s into the first window: a search of the whole window would cut there.
         let input = noise(count: 16_000 * 30 + 1_234, gaps: [32_000..<35_200])
@@ -70,30 +69,29 @@ private let url = URL(fileURLWithPath: "/audio/long.m4a")
         await job.run(url: url)
 
         #expect(Array(recorder.sent.joined()) == input)
-        // #143(c): the estimate is an upper bound on what is sent.
+        // The estimate is an upper bound on what is sent.
         #expect(recorder.sent.count <= estimate)
-        // #143(b): each cut is in the last 5 s of its 12 s window.
+        // Each cut is in the last 5 s of its 12 s window.
         #expect(recorder.sent.dropLast().allSatisfy { $0.count >= 16_000 * 7 })
         let parts = recorder.stateAtSend.map { state -> Int? in
             if case .transcribing(_, let chunk, _) = state { chunk } else { nil }
         }
         #expect(parts == (1...recorder.sent.count).map { Optional($0) })
-        // #147: the last part shown is "part N of N".
+        // The last part shown is "part N of N".
         let last = try #require(recorder.stateAtSend.last)
         #expect(last == .transcribing(fileName: "long.m4a", chunk: recorder.sent.count, count: recorder.sent.count))
-        // #162: no read, the one that finds the end included, shows a part not yet sent.
+        // No read, the one that finds the end included, shows a part not yet sent.
         for (state, sends) in recorder.stateAtRead {
             if case .transcribing(_, let chunk, _) = state { #expect(chunk <= sends) }
         }
     }
 
-    // #146
     @Test func onlyAResumableHubErrorOffersResume() async {
         let cases: [(HubError, Bool)] = [
             (.tooLarge, false), (.unsupportedAudio, false), (.network("offline"), true),
             // The hub's 30 s body-read timeout: a slow link or a suspended app.
             (.server(status: 408, code: "request_timeout", message: nil), true),
-            (.invalidRequest(message: nil), false),  // What HubError.from makes of every 400 (#222).
+            (.invalidRequest(message: nil), false),  // What HubError.from makes of every 400.
             (.unauthorized, true), (.upstreamUnavailable(status: 503), true),
             (.server(status: 500, code: nil, message: nil), true),
         ]
@@ -107,7 +105,6 @@ private let url = URL(fileURLWithPath: "/audio/long.m4a")
         }
     }
 
-    // #148
     @Test func aRequestShorterThanTheSearchIsNotCutNearItsStart() {
         let window = noise(count: 16_000, gaps: [0..<800])  // A silent first frame.
         #expect(UploadChunker.cutIndex(samples: window, sampleRate: 16_000) >= 8_000)
@@ -115,7 +112,6 @@ private let url = URL(fileURLWithPath: "/audio/long.m4a")
         #expect(UploadChunker.chunkCount(sampleCount: 48_000, sampleRate: 16_000, maxSeconds: 1) == 5)
     }
 
-    // #141
     @Test func theLengthLimitIsWordedInHoursAndMinutes() {
         #expect(UploadFailure.limitText(seconds: 4 * 3_600) == "4 hours")
         #expect(UploadFailure.limitText(seconds: 3_600) == "1 hour")

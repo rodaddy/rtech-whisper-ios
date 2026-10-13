@@ -24,7 +24,7 @@ struct DictateControl: ControlWidget {
     }
 }
 
-/// The Control Center control for a brain dump (ios#484): opens the Brain
+/// The Control Center control for a brain dump: opens the Brain
 /// dump tab with the box focused.
 struct BrainDumpControl: ControlWidget {
     var body: some ControlWidgetConfiguration {

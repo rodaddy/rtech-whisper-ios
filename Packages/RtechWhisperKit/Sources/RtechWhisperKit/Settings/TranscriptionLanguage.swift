@@ -1,6 +1,6 @@
 import Foundation
 
-/// The language dictation is transcribed in (ios#29), the desktop's
+/// The language dictation is transcribed in, the desktop's
 /// `preferredLanguage` with the same choices as its `languageRegistry.json`.
 /// Auto lets the hub detect it and on-device speech use the phone's locale.
 public struct TranscriptionLanguage: Hashable, Identifiable, Sendable {
