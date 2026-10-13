@@ -1,0 +1,31 @@
+{
+  "error": { "message": "The note changed on the hub since this device last saw it." },
+  "code": "note_version_conflict",
+  "data": {
+    "note": {
+      "id": "a3e1f0c2-7b6d-4e8a-9c10-5d4f3b2a1e01",
+      "client_note_id": "local-note-1",
+      "title": "Standup",
+      "content": "Edited on the Mac.",
+      "enhanced_content": null,
+      "enhancement_prompt": null,
+      "enhanced_at_content_hash": null,
+      "note_type": "personal",
+      "source_file": null,
+      "audio_duration_seconds": null,
+      "transcript": null,
+      "participants": null,
+      "calendar_event_id": null,
+      "diarization_enabled": null,
+      "expected_speaker_count": null,
+      "folder_id": null,
+      "workspace_id": null,
+      "space_id": null,
+      "user_id": "user-1",
+      "updated_by_user_id": "user-1",
+      "deleted_at": null,
+      "created_at": "2026-09-29T09:00:00.007Z",
+      "updated_at": "2026-09-29T10:20:00.456Z"
+    }
+  }
+}
