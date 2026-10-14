@@ -62,7 +62,7 @@ public struct QueuedDictation: Codable, Sendable, Equatable, Identifiable {
     }
 
     /// The source label as a pure function. An on-device take reads "will
-    /// update" only while it waits for the hub; a finished one is final (#492).
+    /// update" only while it waits for the hub; a finished one is final.
     /// An edit is never overwritten, so an edited item no longer "will update".
     public static func sourceLabel(source: Source?, isDone: Bool, edited: Bool, cleaned: Bool) -> String {
         switch source {

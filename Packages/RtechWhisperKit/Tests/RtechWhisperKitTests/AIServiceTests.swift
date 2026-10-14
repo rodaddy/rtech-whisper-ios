@@ -51,13 +51,13 @@ struct CleanupServiceTests {
 
     @Test func usesTheConfiguredModelAgentNameAndDictionary() async throws {
         let llm = FakeLLM(reply: "ok")
-        let settings = CleanupSettings(model: "other-model", agentName: nil, customDictionary: ["Rodaddy", " ", "llama-swap"])
+        let settings = CleanupSettings(model: "other-model", agentName: nil, customDictionary: ["Webpack", " ", "pg-bouncer"])
         _ = await CleanupService(llm: llm, settings: settings).clean("hello")
         let request = try #require(llm.requests.first)
         #expect(request.model == "other-model")
         let system = request.messages[0].content
         #expect(system.contains(#"Mentions of "Assistant" or any AI"#))
-        #expect(system.hasSuffix("\n\nCustom Dictionary (use these exact spellings when they appear in the text): Rodaddy, llama-swap"))
+        #expect(system.hasSuffix("\n\nCustom Dictionary (use these exact spellings when they appear in the text): Webpack, pg-bouncer"))
     }
 
     @Test func cleanupOffSkipsTheModelButStillRemovesFillers() async {

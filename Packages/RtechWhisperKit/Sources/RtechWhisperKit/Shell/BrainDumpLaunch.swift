@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// A "Brain dump" request from outside the app (ios#484): the Action button,
+/// A "Brain dump" request from outside the app: the Action button,
 /// Siri, Spotlight, a Home Screen shortcut, or the Control Center control.
 /// The intent sets it; the app shell consumes it once it is on screen and
 /// opens the Brain dump tab with the text box focused. It never records.

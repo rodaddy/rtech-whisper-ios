@@ -9,7 +9,7 @@ struct DictateView: View {
     let notes: NotesViewModel
     let history: HistoryViewModel
     @State private var saveStatus: SaveNoteStatus = .idle
-    /// The Undo window after Delete (#472).
+    /// The Undo window after Delete.
     @State private var pendingDelete = PendingDelete()
     /// The text box; Done, Record and a swipe on Home put the keyboard away.
     @FocusState private var textFocused: Bool

@@ -54,7 +54,7 @@ public struct TranscriptionClient: Sendable {
     }
 
     /// The relay request and its multipart body, apart, so a background
-    /// session can send the body from a file (#96).
+    /// session can send the body from a file.
     public func uploadRequest(
         wav: Data, language: String? = nil, prompt: String? = nil
     ) throws(HubError) -> (request: URLRequest, body: Data) {

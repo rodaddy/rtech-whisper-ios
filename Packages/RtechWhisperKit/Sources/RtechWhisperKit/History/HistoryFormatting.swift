@@ -8,7 +8,7 @@ public enum HistoryFormatting {
     public static let onDeviceProvider = "on-device"
 
     /// The `provider` a finished take is recorded with: on-device when Apple's
-    /// recognizer produced its text, otherwise the hub (#493).
+    /// recognizer produced its text, otherwise the hub.
     public static func provider(for source: QueuedDictation.Source?) -> String {
         source == .onDevice ? onDeviceProvider : hubProvider
     }

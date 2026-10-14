@@ -4,7 +4,6 @@ import Testing
 
 @testable import RtechWhisperKit
 
-// Review findings #55 #56 #62 #63 #64 #65 #69 #71.
 
 /// An ordered log both a source and a relay write to.
 private final class EventLog: @unchecked Sendable {
@@ -83,7 +82,6 @@ private let url = URL(fileURLWithPath: "/audio/interview.m4a")
 
 @MainActor
 @Suite struct UploadStreamingTests {
-    // #55
     @Test func eachChunkIsReadOnlyWhenItIsSent() async {
         let log = EventLog()
         let relay = ScriptedRelay([said("one"), said("two"), said("three")], log: log)
@@ -93,12 +91,11 @@ private let url = URL(fileURLWithPath: "/audio/interview.m4a")
         await upload.run(url: url)
 
         #expect(upload.result?.text == "one two three")
-        // Each send is logged with its sample count, so a duplicated or lost stretch shows (#151).
+        // Each send is logged with its sample count, so a duplicated or lost stretch shows.
         #expect(
             log.all == ["read 16001", "send 15600", "read 15600", "send 15600", "read 8399", "send 8800", "read 0"])
     }
 
-    // #55
     @Test func aFileOverTheLengthCapFailsBeforeAnySend() async {
         let relay = ScriptedRelay([])
         let audio = DecodedAudio(samples: [1], durationSeconds: Double(UploadJob.maxDurationSeconds) + 1)
@@ -110,7 +107,6 @@ private let url = URL(fileURLWithPath: "/audio/interview.m4a")
         #expect(relay.sent.isEmpty)
     }
 
-    // #56
     @Test func resumeCarriesOnFromTheFailedChunkKeepingEarlierText() async throws {
         let relay = ScriptedRelay([said("one"), .failure(.unauthorized), said("two"), said("three")])
         let input = distinct(40_000)
@@ -127,7 +123,7 @@ private let url = URL(fileURLWithPath: "/audio/interview.m4a")
 
         #expect(upload.result?.text == "one two three")
         #expect(reported == ["one two three"])
-        // Fatal, so a resume that sent nothing fails here instead of trapping below (#150).
+        // Fatal, so a resume that sent nothing fails here instead of trapping below.
         try #require(relay.sent.count == 4)
         #expect(relay.sent[1] == relay.sent[2])
         // Every sample sent once, in order, across the resume.
@@ -235,14 +231,13 @@ private final class FixtureDirectory {
 }
 
 @Suite struct AudioFileReaderTests {
-    // #55
     @Test func readsAtMostTheAskedSamplesUntilTheEnd() async throws {
         let dir = try FixtureDirectory()
         let file = try dir.wav(seconds: 3, channels: 1) { _, frame in sin(Float(frame) * 0.06) * 0.5 }
         let reader = try AudioFileReader(url: file)
         #expect(abs(reader.durationSeconds - 3) < 0.01)
 
-        // Bounded, so a reader that never reports the end fails rather than hangs (#155).
+        // Bounded, so a reader that never reports the end fails rather than hangs.
         var chunks: [[Int16]] = []
         var ended = false
         for _ in 0..<10 {
@@ -255,15 +250,14 @@ private final class FixtureDirectory {
         }
         #expect(ended)
         #expect(chunks.allSatisfy { $0.count <= 16_000 })
-        // Exact: slack would hide a dropped tail (#153). The end of the file
-        // (`eofErr`) is the end of the audio, not a read error (#87).
+        // Exact: slack would hide a dropped tail. The end of the file
+        // (`eofErr`) is the end of the audio, not a read error.
         #expect(chunks.reduce(0) { $0 + $1.count } == 48_000)
         let whole = try await AudioFileReader(url: file).read(maxSamples: .max)
         #expect(Array(chunks.joined()) == whole)
         #expect(try await reader.read(maxSamples: 16_000) == [])
     }
 
-    // #87
     @Test func onlyCoreAudiosEndOfFileCountsAsTheEnd() {
         #expect(AudioFileReader.isEndOfFile(NSError(domain: NSOSStatusErrorDomain, code: -39)))
         #expect(!AudioFileReader.isEndOfFile(NSError(domain: NSOSStatusErrorDomain, code: -50)))
@@ -299,7 +293,7 @@ private final class FixtureDirectory {
         #expect(failure as? AudioFileDecoderError == .endedEarly)
     }
 
-    // #243: one rule for every format, VBR included: a whole packet short is early.
+    // One rule for every format, VBR included: a whole packet short is early.
     @Test func aVBRFileAWholePacketShortIsAnEarlyEnd() {
         // AAC: 1,024 frames per packet.
         #expect(AudioFileReader.endedEarly(at: 88_200 - 1_024, length: 88_200, framesPerPacket: 1_024))
@@ -327,7 +321,7 @@ private final class FixtureDirectory {
         #expect(!AudioFileReader.endedEarly(at: 88_200, length: 88_200, framesPerPacket: 0))
     }
 
-    // #243: a read that returns no frames and no error is checked like `eofErr`.
+    // A read that returns no frames and no error is checked like `eofErr`.
     @Test func aZeroFrameReadShortOfTheLengthIsAnEarlyEnd() {
         let early = AudioFileReader.endOfInputError(nil, at: 44_100, length: 88_200, framesPerPacket: 1)
         #expect(early as? AudioFileDecoderError == .endedEarly)
@@ -340,7 +334,7 @@ private final class FixtureDirectory {
         #expect(AudioFileReader.endOfInputError(other, at: 88_200, length: 88_200, framesPerPacket: 1) as? NSError == other)
     }
 
-    // #242: a real AAC .m4a reads to its end with no error and all its audio.
+    // A real AAC .m4a reads to its end with no error and all its audio.
     @Test func anAACFileReadsToItsEnd() async throws {
         let dir = try FixtureDirectory()
         let file = try dir.m4a(seconds: 5) { frame in sin(Float(frame) * 0.06) * 0.5 }
@@ -385,7 +379,6 @@ private final class FixtureDirectory {
         await #expect(throws: AudioFileDecoderError.endedEarly) { try await reader.read(maxSamples: 16_000) }
     }
 
-    // #63
     @Test func stereoFileKeepsTheRightChannel() async throws {
         let dir = try FixtureDirectory()
         // A speaker on the right only; the left is silent.
@@ -400,7 +393,6 @@ private final class FixtureDirectory {
 }
 
 @Suite struct DictationReviewTests {
-    // #64
     @Test func aWhitespaceTrimAloneIsNotCleaned() async {
         let processor = DictationPostProcessor(clean: { $0.trimmingCharacters(in: .whitespacesAndNewlines) })
         let processed = await processor.process(" hello there\n")
@@ -409,15 +401,13 @@ private final class FixtureDirectory {
         #expect(await DictationPostProcessor(clean: { _ in "Hello there." }).process(" hello there").wasCleaned)
     }
 
-    // #69
     @Test func transcribingStaysFreshThroughTheHubBudget() {
-        // The hub's 180 s plus at least 30 s for the upload itself (#152).
+        // The hub's 180 s plus at least 30 s for the upload itself.
         #expect(DictationActivityContent.transcribingStaleAfter >= 180 + 30)
-        // And never stale while the take is still inside its own request timeout (#258).
+        // And never stale while the take is still inside its own request timeout.
         #expect(DictationActivityContent.transcribingStaleAfter >= TranscriptionClient.requestTimeout)
     }
 
-    // #71
     @Test func aSecondSaveTapWhileSavingIsIgnored() {
         var status = SaveNoteStatus.idle
         var began = status.beginSaving("text") != nil
@@ -442,7 +432,6 @@ private actor Order {
 
 @MainActor
 @Suite struct SerialTaskChainTests {
-    // #65
     @Test func laterWorkWaitsForEarlierWork() async {
         let chain = SerialTaskChain()
         let order = Order()
@@ -456,7 +445,7 @@ private actor Order {
         #expect(await order.finished == [1, 2, 3])
     }
 
-    // #219: a quick op releases the next at once, not after maxWait.
+    // A quick op releases the next at once, not after maxWait.
     @Test func aQuickOperationReleasesTheNextWithoutWaitingOutMaxWait() async {
         let chain = SerialTaskChain(maxWait: .seconds(30))
         let order = Order()
@@ -470,11 +459,10 @@ private actor Order {
         #expect(clock.now - began < .seconds(5))
     }
 
-    // #90 #219 #259
     @Test func aStalledOperationHoldsLaterWorkOnlyForMaxWaitThenKeepsOrder() async {
         let chain = SerialTaskChain(maxWait: .milliseconds(100))
         let order = Order()
-        // Cancelled at the end, so no hour-long sleep outlives the test (#259).
+        // Cancelled at the end, so no hour-long sleep outlives the test.
         let stall = Task.detached { try? await Task.sleep(for: .seconds(3_600)) }
         chain.enqueue { await stall.value }
         chain.enqueue { await order.add(2) }

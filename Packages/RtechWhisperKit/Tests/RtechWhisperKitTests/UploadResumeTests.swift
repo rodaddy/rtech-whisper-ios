@@ -3,7 +3,7 @@ import Testing
 
 @testable import RtechWhisperKit
 
-// #86: an upload outlives the process.
+// An upload outlives the process.
 
 /// Answers from a script and keeps each WAV.
 private final class Relay: @unchecked Sendable {

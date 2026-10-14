@@ -3,7 +3,7 @@ import Testing
 
 @testable import RtechWhisperKit
 
-// #96: the app's background session stages each body in a file and maps a
+// The app's background session stages each body in a file and maps a
 // finished task back to its chunk's answer.
 @Suite struct BackgroundUploaderTests {
     let directory = URL.temporaryDirectory.appending(path: "BackgroundUploaderTests-\(UUID().uuidString)")

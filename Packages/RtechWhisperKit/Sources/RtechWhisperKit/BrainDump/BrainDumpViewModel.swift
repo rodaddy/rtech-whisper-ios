@@ -14,7 +14,7 @@ public enum BrainDumpError: LocalizedError, Equatable {
     }
 }
 
-/// The Brain dump tab (ios#484): quick capture into a "Brain dumps" folder.
+/// The Brain dump tab: quick capture into a "Brain dumps" folder.
 /// Each dump is an ordinary note, so it syncs to the Mac like any other; the
 /// Mac sorts them and moves the originals to the processed folder, which
 /// this tab leaves out.

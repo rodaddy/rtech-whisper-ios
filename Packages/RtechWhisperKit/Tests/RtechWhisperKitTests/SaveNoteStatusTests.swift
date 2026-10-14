@@ -25,7 +25,7 @@ struct SaveNoteStatusTests {
         #expect(SaveNoteStatus.idle.message == nil)
     }
 
-    // #92: A's save ends after B is on screen and B's own save has started.
+    // A's save ends after B is on screen and B's own save has started.
     @Test func aSaveThatOutlivesItsTextLeavesTheNewerStatusAlone() throws {
         var status = SaveNoteStatus.idle
         let aToken = status.beginSaving("A")
@@ -48,7 +48,7 @@ struct SaveNoteStatusTests {
         #expect(failed == .failed("Could not save the note: disk full"))
     }
 
-    // #205: two saves of the same text; the first ends while the second is in flight.
+    // Two saves of the same text; the first ends while the second is in flight.
     @Test func aSaveIsMatchedByItsTokenNotItsText() throws {
         var status = SaveNoteStatus.idle
         let firstToken = status.beginSaving("same")
@@ -65,7 +65,7 @@ struct SaveNoteStatusTests {
         #expect(status == .saved("same"))
     }
 
-    // #256: an outdated save that failed is logged, not dropped; a success is not.
+    // An outdated save that failed is logged, not dropped; a success is not.
     @Test func anOutdatedFailedSaveIsLogged() throws {
         var status = SaveNoteStatus.idle
         let aToken = status.beginSaving("A")

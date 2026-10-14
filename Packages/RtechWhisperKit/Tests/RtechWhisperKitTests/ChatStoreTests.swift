@@ -57,7 +57,7 @@ struct ChatStoreTests {
         try await store.delete(old.id)
         #expect(try await store.conversations().map(\.title) == ["renamed"])
         await #expect(throws: ChatStoreError.conversationNotFound(old.id)) { try await store.messages(in: old.id) }
-        // The rows themselves are gone, not just unreachable (#192).
+        // The rows themselves are gone, not just unreachable.
         #expect(try storedMessageCount(store) == 0)
     }
 
@@ -87,7 +87,7 @@ struct ChatStoreReviewFixTests {
         #expect(try await store.messages(in: kept.id).map(\.content) == ["kept"])
     }
 
-    // #177: a failed append leaves updatedAt; a failed rename leaves the
+    // A failed append leaves updatedAt; a failed rename leaves the
     // title. A failed delete is covered by aFailedDeleteKeepsTheConversation.
     @Test func failedWritesLeaveTheConversationAsItWas() async throws {
         let store = try ChatStore.inMemory()
@@ -103,7 +103,7 @@ struct ChatStoreReviewFixTests {
         #expect(try await store.messages(in: kept.id).map(\.content) == ["hi"])
     }
 
-    // #237: a failed delete throws, keeps the conversation and its messages,
+    // A failed delete throws, keeps the conversation and its messages,
     // and does not trap in SwiftData (rolling back a cascade delete did);
     // a later delete with saves working still removes both.
     @Test func aFailedDeleteKeepsTheConversation() async throws {
@@ -125,7 +125,7 @@ struct ChatStoreReviewFixTests {
         #expect(try storedMessageCount(store) == 0)
     }
 
-    // #211: appending a stored message id again throws and changes nothing.
+    // Appending a stored message id again throws and changes nothing.
     @Test func appendingAStoredIdAgainThrows() async throws {
         let store = try ChatStore.inMemory()
         let a = try await store.createConversation(title: "a", now: Date())
@@ -139,7 +139,7 @@ struct ChatStoreReviewFixTests {
         #expect(try await store.messages(in: b.id).isEmpty)
     }
 
-    // #124: a row whose role or tool calls do not decode is reported, not
+    // A row whose role or tool calls do not decode is reported, not
     // read back as an assistant message with no calls.
     @Test func aDamagedRowThrowsInsteadOfGuessing() throws {
         let call = LLMToolCall(id: "c", name: "get_note", arguments: "{}")

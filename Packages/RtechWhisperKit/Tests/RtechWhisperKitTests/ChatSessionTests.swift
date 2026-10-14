@@ -246,9 +246,9 @@ struct ChatSessionTests {
         #expect(ChatSession.history(messages) == messages.map(\.llmMessage))
     }
 
-    @Test func theDefaultPromptIsTheDesktopPersonaWithToolLines() {
+    @Test func theDefaultPromptIsThePersonaWithToolLines() {
         let prompt = ChatPrompt.system(tools: ["search_notes", "list_folders"])
-        #expect(prompt.hasPrefix("You are Skippy the Magnificent"))
+        #expect(prompt.hasPrefix("You are a helpful assistant"))
         #expect(prompt.hasPrefix(ChatPrompt.persona + "\n\nYou have access to tools. Use search_notes"))
         #expect(prompt.hasSuffix(ChatPrompt.toolInstructions["list_folders"]!))
         #expect(ChatPrompt.system(tools: []) == ChatPrompt.persona)

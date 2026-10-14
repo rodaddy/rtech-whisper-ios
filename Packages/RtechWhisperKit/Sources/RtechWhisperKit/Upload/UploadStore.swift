@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 /// An upload's progress, saved after every chunk so a relaunch carries on
-/// from the first chunk not done instead of starting over (#86).
+/// from the first chunk not done instead of starting over.
 @Model
 public final class SavedUpload {
     @Attribute(.unique) public var id: UUID
@@ -44,7 +44,7 @@ public struct UploadCheckpoint: Sendable, Equatable {
         case sending
         /// The hub stopped it with an error a resend can get past.
         case stopped
-        /// The file stopped being readable part-way (#156); the next
+        /// The file stopped being readable part-way; the next
         /// foreground retries it from `sentSamples`.
         case truncated
         /// A retry of a truncated upload read no further than the pass before

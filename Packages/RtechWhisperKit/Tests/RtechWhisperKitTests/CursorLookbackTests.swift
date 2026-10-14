@@ -8,7 +8,7 @@ import Testing
 // before a pass started can become visible only after the pass read the
 // table. Every stored delta cursor therefore sits L = 60 s behind the pass
 // clock, `since` is truncated to the millisecond, and a re-served row this
-// device already holds is a no-op (issue #318, hub protocol section 8).
+// device already holds is a no-op (hub protocol section 8).
 
 private let t0 = Date(timeIntervalSince1970: 1_790_000_000)
 /// L, the lookback, as the contract states it.
@@ -170,7 +170,7 @@ struct CursorLookbackTests {
         #expect(await rig.engine.parkedNoteIds.isEmpty)
         #expect(rig.cursors.cursor(SyncEngine.noteCursorKey) == third.addingTimeInterval(-lookback))
         #expect(try await rig.store.notes().map(\.clientId) == notes.map(\.clientId))
-        // The tombstone refiled the held note as a pending edit (ios#553).
+        // The tombstone refiled the held note as a pending edit.
         #expect(try await rig.store.pendingNotes().map(\.clientId) == notes.map(\.clientId))
     }
 
@@ -240,7 +240,7 @@ struct CursorLookbackTests {
         let defaults = try #require(UserDefaults(suiteName: "CursorLookback-\(UUID().uuidString)"))
         let s = t0.addingTimeInterval(1000)
         let keys = [TranscriptionSync.cursorKey, DictionarySync.cursorKey]
-        // Folder and note cursors are dropped once instead (ios#557, ios#566).
+        // Folder and note cursors are dropped once instead.
         let dropped = [SyncEngine.folderCursorKey, SyncEngine.noteCursorKey]
         for key in keys + dropped {
             defaults.set(HubDate.string(from: s), forKey: "sync.cursor.\(key)")

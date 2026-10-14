@@ -1,6 +1,6 @@
 import Foundation
 
-/// The `BackgroundTransport` the app uses (#96): a background `URLSession`
+/// The `BackgroundTransport` the app uses: a background `URLSession`
 /// that sends each kept chunk's relay body from a file, so the system keeps
 /// sending while the app is suspended or terminated, and hands each answer
 /// to `BackgroundAnswers` by the task's `UploadChunkTag`.

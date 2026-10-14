@@ -63,15 +63,15 @@ private let url = URL(fileURLWithPath: "/audio/damaged.m4a")
 
         let expected = UploadResult(
             fileName: "damaged.m4a", text: "one two", durationSeconds: 2, noSpeech: false, truncated: true,
-            truncationReason: "The rest of the file could not be read.")  // #149 #207: plain words for the footer.
+            truncationReason: "The rest of the file could not be read.")  // Plain words for the footer.
         #expect(upload.state == .done(expected))
-        // #156: a truncated upload is not complete, so no history row is written.
+        // A truncated upload is not complete, so no history row is written.
         #expect(reported.isEmpty)
         // Two cut chunks, then the 800 samples left before the damage.
         #expect(replies.sends == 3)
     }
 
-    // #161: the read that throws finds carry left over from the last cut, and sends it.
+    // The read that throws finds carry left over from the last cut, and sends it.
     @Test func aReadErrorWithCarryLeftSendsTheCarry() async {
         let good = (0..<16_001).map { Int16(truncatingIfNeeded: $0 &* 7 &+ 1) }
         let replies = Replies(["one", "two"])

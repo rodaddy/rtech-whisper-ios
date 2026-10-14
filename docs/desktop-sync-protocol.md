@@ -1,26 +1,27 @@
 # Desktop sync protocol: what the hub would have to speak
 
-Deliverable for rtech-whisper-ios#2.
-Read on 2026-09-29 from the rTech Whisper desktop app (an OpenWhispr fork) at commit `8ce7c33e`.
+Read on 2026-09-29 from the rTech Whisper desktop app, an OpenWhispr fork
+([rodaddy/openwhispr](https://github.com/rodaddy/openwhispr), branch
+`rtech-whisper`). The server it syncs with is
+[rodaddy/rtech-whisper-hub](https://github.com/rodaddy/rtech-whisper-hub).
 
-Sources read: `src/services/SyncService.ts`, `src/services/cloudApi.ts`
-(the issue's `cloudApi.js` is now `.ts`), the per-entity services it calls
+Sources read: `src/services/SyncService.ts`, `src/services/cloudApi.ts`,
+the per-entity services it calls
 (`NotesService`, `FoldersService`, `SpacesService`, `DictionaryService`,
 `SnippetService`, `TranscriptionsService`, `ConversationsService`),
 `src/services/noteListQuery.ts`, `src/services/syncPassPolicy.ts`,
 `src/helpers/cloudApiRequest.js`, `src/helpers/cloudSyncGuards.js`,
-`src/helpers/tokenStore.js`, `src/helpers/policyRequestHeaders.js`, commit
-`481d2451`, and the live desktop database (read-only).
+`src/helpers/tokenStore.js`, and `src/helpers/policyRequestHeaders.js`.
 
 The upstream OpenWhispr server is not in the repo. Everything below about the
 server's behavior is inferred from what the client sends and how it reacts.
 
 ## 1. The fork has sync switched off today
 
-Commit `481d2451` ("prepare local-only rTech desktop runtime", 2026-09-11)
-removed accounts, workspaces, billing, and the managed cloud. It deleted the
-`cloudApiRequest` bridge from `preload.js` and its `cloud-api-request` handler
-from `ipcHandlers.js`. `settingsStore.ts:117` pins `isSignedIn` to `false`.
+The fork removed accounts, workspaces, billing, and the managed cloud. It
+deleted the `cloudApiRequest` bridge from `preload.js` and its
+`cloud-api-request` handler from `ipcHandlers.js`. `settingsStore.ts` pins
+`isSignedIn` to `false`.
 
 `SyncService.ts` and its callers (`noteStore`, `audioManager`, the note tools)
 are still in the tree, but every pass returns before sending anything:
@@ -28,37 +29,13 @@ consent requires a validated auth context and `isSignedIn`
 (`syncPassPolicy.ts` `resolveSyncConsent`). `createCloudApiRequestHandler` and
 `tokenStore` survive and have tests.
 
-What does run today is separate from this engine:
-
-- **Note sharing** goes through its own `shareClient.js` IPC path to the share
-  service (`server/share`, openwhispr #68 and #76), not through
-  `SyncService`. `https://share.rtech-consulting.com/healthz` returned 200 on
-  2026-09-29.
-- **`server/gateway`, `server/web`, `server/agent`** hold the shared LiveKit
-  voice slice (2026-09-15). The gateway stores voice sessions only. None of
-  the three syncs notes.
-
-No branch, stash, worktree, or remote ref of openwhispr restores the
-`cloud-api-request` bridge (pickaxe search over all refs since 2026-09-11).
+Note sharing goes through its own `shareClient.js` IPC path to a separate
+share service, not through `SyncService`.
 
 Upstream's own phone app, `openwhispr-mobile/` on upstream `main` (Expo/React
 Native, v1.1.0), is a working client of this same protocol
 (`src/data/synced/SyncedNotesRepository.ts`). It is the reference for the
 Swift client's behavior. It is read for reference only, never copied in.
-
-Live desktop data (2026-09-29, `transcriptions.db`, read-only):
-
-| Table | Rows | Soft-deleted | With `cloud_id` |
-| --- | --- | --- | --- |
-| `spaces` | 1 (`private`, "Personal") | – | – |
-| `folders` | 8 | 0 | 0 |
-| `notes` | 22 (all `sync_status = pending`) | 13 | 0 |
-| `custom_dictionary` | 11 | 0 | 0 |
-| `snippets` | 8 | 0 | 0 |
-| `transcriptions` | 4068 | 0 | 0 |
-| `agent_conversations` | 9 | 8 | 0 |
-
-Nothing has ever synced. Every notes and folders row has `account_id` NULL.
 
 ## 2. Transport and auth
 
@@ -188,7 +165,7 @@ the hub.
 | Notes | Yes | Optimistic concurrency, conflict banner |
 | Dictionary | Yes | |
 | Snippets | Yes | |
-| Transcriptions | Yes, append-only | 4068 rows on first push, in batches of 100 |
+| Transcriptions | Yes, append-only | First push sends the whole history, in batches of 100 |
 | Agent conversations | Upstream only; not an epic entity | |
 
 ## 5. How conflicts resolve
@@ -229,16 +206,16 @@ the Mac stays in personal-only mode. The iPhone app speaks the same subset.
 Why:
 
 - The Mac already has a 2,700-line sync engine with a tested edge-case
-  history: the #1290 overwrite fix, conflict banners, orphan cleanup, and
-  cursor stall guards. Our own protocol would mean writing and proving a new
-  Mac sync engine, which is exactly what #2 set out to avoid.
+  history: an overwrite fix, conflict banners, orphan cleanup, and cursor
+  stall guards. A new protocol would mean writing and proving a new Mac
+  sync engine, which is what this design sets out to avoid.
 - The server side is small: CRUD over five tables, since-cursor lists that
   include tombstones, server-stamped `updated_at`, and three `409` rules (note
   version, folder name, snippet trigger). That is a normal Postgres service.
 - The phone gets a documented contract instead of a new one we design and
   document from scratch.
 
-What speaking it costs on the Mac (the openwhispr PR in #5):
+What speaking it costs on the Mac (a change to the desktop fork):
 
 1. Restore the `cloudApiRequest` preload bridge and its IPC handler. The
    handler factory is still in the tree.
@@ -249,27 +226,27 @@ What speaking it costs on the Mac (the openwhispr PR in #5):
 4. Open the consent gate (`isSignedIn`, `cloudBackupEnabled`,
    `isSubscribed`). This must bypass the account-scope reconciliation in
    `src/lib/authAccountScope.ts`, whose `purge` path deletes local rows. Every
-   local row has `account_id` NULL and nothing is backed up yet.
+   local row may have `account_id` NULL, and nothing is backed up yet.
 
 Risks:
 
 - **R1: first sync can lose data.** Item 4 is the data-loss risk. Before
-  the first sync, copy `transcriptions.db` and prove against a copy that the
+  the first sync, copy the local database and prove against a copy that the
   rewired sign-in path never takes the `purge` branch.
 - **R2: clock skew.** Notes and folders cursors use the Mac's clock, while
   the server stamps `updated_at`. If the Mac runs ahead of the hub, a delta
-  pull can skip rows. The hub must run NTP, and #5's round-trip test should
-  cover it.
-- **R3: dead-code bugs.** The engine has been dead code in the fork since
-  2026-09-11, so upstream-only paths may break at runtime. #5 verifies this
-  with the round trip the issue already requires.
+  pull can skip rows. The hub must run NTP, and the desktop round-trip test
+  should cover it.
+- **R3: dead-code bugs.** The engine is dead code in the fork, so
+  upstream-only paths may break at runtime. A desktop round-trip test
+  verifies this.
 
-The alternative is our own protocol: a small changes-feed API, with a new
+The alternative is a new protocol: a small changes-feed API, with a new
 sync module on the Mac and the same module design on the phone. It avoids
 reviving auth plumbing, but it replaces a tested engine with an untested one.
 It is the better choice only if item 4 proves unsafe.
 
-**Decision (Rico, 2026-09-29):** use the upstream subset and stay as close to
+**Decision (2026-09-29):** use the upstream subset and stay as close to
 it as possible. Diverge only where the Swift client or the hub genuinely needs
 something different. Record each divergence here, with its reason, when it is
 made.

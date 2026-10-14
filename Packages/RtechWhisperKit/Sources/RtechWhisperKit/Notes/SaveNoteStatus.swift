@@ -4,7 +4,7 @@ import OSLog
 /// Outcome of "Save as note" in Dictate, History and Upload, shown under the buttons.
 public enum SaveNoteStatus: Equatable, Sendable {
     /// Names one save, so a save that outlives its text never settles
-    /// another save of the same text (#205).
+    /// another save of the same text.
     public struct Token: Hashable, Sendable {
         let id = UUID()
     }
@@ -55,7 +55,7 @@ public enum SaveNoteStatus: Equatable, Sendable {
     /// success. Ignored unless that save is still the one shown, so a save
     /// that outlives its screen never changes the status of whatever
     /// replaced it; a failure ignored that way is logged, to `logOutdated`
-    /// when given, rather than dropped (#256).
+    /// when given, rather than dropped.
     public mutating func finishSaving(
         _ token: Token, error: (any Error)?, logOutdated: ((String) -> Void)? = nil
     ) {

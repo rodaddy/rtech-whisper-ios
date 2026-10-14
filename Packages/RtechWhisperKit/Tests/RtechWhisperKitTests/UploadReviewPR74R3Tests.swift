@@ -101,7 +101,7 @@ private func upload(_ source: any AudioSampleSource, relay: SampleRelay) -> Uplo
         // 40,000 good samples in 20,000-sample blocks. The second read converts
         // the second block, which holds the rest and throws; it converts past
         // what that read asks for, so later reads hand out the stranded
-        // samples before the error (#165).
+        // samples before the error.
         let good = ramp(40_000)
         let relay = SampleRelay(["one", "two", "three", "four", "five"])
         let source = BlockDamagedSource(good: good, block: 20_000, durationSeconds: 10)
@@ -127,6 +127,6 @@ private func upload(_ source: any AudioSampleSource, relay: SampleRelay) -> Uplo
         #expect(relay.sent == [good])
         #expect(job.result?.text == "start")
         #expect(job.result?.truncated == true)
-        #expect(job.result?.durationSeconds == 0.5625)  // 9,000 samples sent, not the 10 s header (#164).
+        #expect(job.result?.durationSeconds == 0.5625)  // 9,000 samples sent, not the 10 s header.
     }
 }

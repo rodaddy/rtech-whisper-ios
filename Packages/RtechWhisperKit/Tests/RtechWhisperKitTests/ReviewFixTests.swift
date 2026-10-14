@@ -175,7 +175,7 @@ private func heard(_ text: String) -> Result<Transcript, HubError> {
     @Test func cleanupSettingsCarryTheDictionary() {
         let defaults = UserDefaults(suiteName: "ReviewFix-\(UUID().uuidString)")!
         let store = AISettingsStore(defaults: defaults)
-        #expect(store.cleanupSettings(dictionary: ["Rodaddy", "Proxmox"]).customDictionary == ["Rodaddy", "Proxmox"])
+        #expect(store.cleanupSettings(dictionary: ["Webpack", "Grafana"]).customDictionary == ["Webpack", "Grafana"])
     }
 }
 

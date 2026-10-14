@@ -4,7 +4,7 @@ import Testing
 
 @testable import RtechWhisperKit
 
-// Snippets (issue #410): a spoken trigger expands to saved text by the
+// Snippets: a spoken trigger expands to saved text by the
 // desktop's rules, and the list syncs through the hub (protocol sections 6
 // and 8) with the dictionary's merge rules.
 
@@ -45,12 +45,12 @@ struct SnippetExpansionTests {
             // A prefix of "investor ask": only longest-first lets the longer one win.
             ("investor", "VC"),
             ("investor ask", "the Series A ask"),
-            ("my cal", "cal.com/rico"),
+            ("my cal", "cal.com/alex"),
             ("zoom link", "zoom.us/j/123 my cal"),
         ]
-        #expect(expand("my cal and zoom link", snippets) == "cal.com/rico and zoom.us/j/123 my cal")
+        #expect(expand("my cal and zoom link", snippets) == "cal.com/alex and zoom.us/j/123 my cal")
         #expect(expand("the investor ask, then ask", snippets) == "the the Series A ask, then a question")
-        #expect(expand("my cal. My Cal!", snippets) == "cal.com/rico. cal.com/rico!")
+        #expect(expand("my cal. My Cal!", snippets) == "cal.com/alex. cal.com/alex!")
         #expect(expand("an investor, an investor ask", snippets) == "an VC, an the Series A ask")
     }
 

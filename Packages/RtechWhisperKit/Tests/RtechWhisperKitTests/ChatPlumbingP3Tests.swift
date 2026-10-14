@@ -40,7 +40,7 @@ private func piece(index: Int? = nil, id: String? = nil, name: String? = nil, ar
 
 @Suite("Chat plumbing P3 fixes: stream")
 struct ChatPlumbingStreamTests {
-    // #77, #109: a mistyped tool_calls field keeps the chunk's text; a bad
+    // A mistyped tool_calls field keeps the chunk's text; a bad
     // entry does not drop a good one beside it.
     @Test func aMistypedToolCallKeepsTheText() throws {
         let events = try decode([
@@ -54,7 +54,7 @@ struct ChatPlumbingStreamTests {
         ]).map(\.id) == ["b"])
     }
 
-    // #109: text and tool-call pieces in one event come out text first.
+    // Text and tool-call pieces in one event come out text first.
     @Test func textAndToolCallInOneEventKeepTheirOrder() throws {
         let events = try decode([
             #"{"choices":[{"delta":{"content":"Looking.","tool_calls":[{"index":0,"id":"a","function":{"name":"get_note","arguments":"{}"}}]}}]}"#,
@@ -62,7 +62,7 @@ struct ChatPlumbingStreamTests {
         #expect(events == [.delta("Looking."), .toolCall(LLMToolCallDelta(index: 0, id: "a", name: "get_note", arguments: "{}"))])
     }
 
-    // #166: interleaved index-less calls go back to their own call by id.
+    // Interleaved index-less calls go back to their own call by id.
     @Test func interleavedIndexlessCallsRouteById() throws {
         #expect(try calls([
             piece(id: "a", name: "get_note", arguments: #"{"id":"#),
@@ -74,7 +74,7 @@ struct ChatPlumbingStreamTests {
         ])
     }
 
-    // #166: a name-only piece, then the id: one call.
+    // A name-only piece, then the id: one call.
     @Test func anIdAfterTheNameJoinsTheSameCall() throws {
         #expect(try calls([
             piece(name: "get_note", arguments: ""),
@@ -82,7 +82,7 @@ struct ChatPlumbingStreamTests {
         ]) == [LLMToolCall(id: "c1", name: "get_note", arguments: #"{"id":"x"}"#)])
     }
 
-    // #167: an index out of range is skipped, not trapped on.
+    // An index out of range is skipped, not trapped on.
     @Test func anOutOfRangeIndexIsSkipped() throws {
         #expect(try calls([
             piece(index: Int.max, id: "big", name: "get_note", arguments: "{}"),
@@ -91,7 +91,7 @@ struct ChatPlumbingStreamTests {
         ]).map(\.id) == ["ok"])
     }
 
-    // #168: the name repeated on every fragment is one call until its
+    // The name repeated on every fragment is one call until its
     // arguments are whole; then the same name opens the next call.
     @Test func aRepeatedNameContinuesAnUnfinishedCall() throws {
         let found = try calls([
@@ -102,7 +102,7 @@ struct ChatPlumbingStreamTests {
         #expect(found.map(\.arguments) == [#"{"id":"a"}"#, #"{"id":"b"}"#])
     }
 
-    // #209: an explicit index never lands in an index-less call's slot.
+    // An explicit index never lands in an index-less call's slot.
     @Test func explicitAndIndexlessPiecesKeepSeparateSlots() throws {
         #expect(try calls([
             piece(id: "x", name: "get_note", arguments: "{}"),
@@ -114,7 +114,7 @@ struct ChatPlumbingStreamTests {
 
 @Suite("Chat plumbing P3 fixes: tool calls")
 struct ChatPlumbingToolCallTests {
-    // #170: the same index with a new id is a second call.
+    // The same index with a new id is a second call.
     @Test func aNewIdAtTheSameIndexOpensANewCall() {
         var assembler = ToolCallAssembler()
         assembler.add(LLMToolCallDelta(index: 0, id: "a", name: "get_note", arguments: "{}"))
@@ -126,7 +126,7 @@ struct ChatPlumbingToolCallTests {
         ])
     }
 
-    // #171: a name piece on a known index replaces the name so far. llama.cpp
+    // A name piece on a known index replaces the name so far. llama.cpp
     // (common/chat.cpp compute_diffs) resends the whole name when it grows, so
     // a partial name is followed by the full one, never by a suffix.
     @Test func aPartialNameThenTheFullNameKeepsTheFullName() {
@@ -136,7 +136,7 @@ struct ChatPlumbingToolCallTests {
         #expect(assembler.calls.map(\.name) == ["get_weather"])
     }
 
-    // #171: one full name, or the same full name sent again, is unchanged.
+    // One full name, or the same full name sent again, is unchanged.
     @Test func aSingleOrRepeatedFullNameIsUnchanged() {
         var assembler = ToolCallAssembler()
         assembler.add(LLMToolCallDelta(index: 0, id: "a", name: "create_note", arguments: "{}"))
@@ -145,7 +145,7 @@ struct ChatPlumbingToolCallTests {
         #expect(assembler.calls.map(\.name) == ["create_note", "get_note"])
     }
 
-    // #108, #84: a call with no id gets an id unique beyond this step, and
+    // A call with no id gets an id unique beyond this step, and
     // no arguments go back as {}; the same holds for a non-stream call.
     @Test func standInsAreUniqueAndArgumentsAreJSON() async throws {
         var first = ToolCallAssembler(), second = ToolCallAssembler()
@@ -162,7 +162,7 @@ struct ChatPlumbingToolCallTests {
         #expect(call.id.hasPrefix("call_") && call.arguments == "{}")
     }
 
-    // #185: one malformed non-stream tool call does not lose the content.
+    // One malformed non-stream tool call does not lose the content.
     @Test func aMalformedCompletionToolCallKeepsTheContent() async throws {
         let body = #"{"choices":[{"finish_reason":"tool_calls","message":{"content":"hi","tool_calls":[{"id":"bad","type":"function"},{"id":"ok","type":"function","function":{"name":"get_note","arguments":"{}"}}]}}]}"#
         let (client, _) = StubLLM.make(.init(chunks: [body]))
@@ -171,7 +171,7 @@ struct ChatPlumbingToolCallTests {
         #expect(completion.toolCalls == [LLMToolCall(id: "ok", name: "get_note", arguments: "{}")])
     }
 
-    // #210: integers beyond 2^53 keep every digit.
+    // Integers beyond 2^53 keep every digit.
     @Test func bigIntegersStayExact() throws {
         let value = try JSONValue(parsing: #"{"n":9007199254740993}"#)
         #expect(value["n"]?.intValue == 9_007_199_254_740_993)
@@ -179,7 +179,7 @@ struct ChatPlumbingToolCallTests {
         #expect(try JSONValue(parsing: "2.5") == 2.5)
     }
 
-    // #184: a number sent as a string with a newline still reads.
+    // A number sent as a string with a newline still reads.
     @Test func intValueTrimsNewlines() {
         #expect(JSONValue.string(" 5\n").intValue == 5)
     }

@@ -321,7 +321,7 @@ struct SyncEngineTests {
         return rig
     }
 
-    @Test("a note edited remotely whose folder was hard-deleted here is refiled to the default folder (#335)")
+    @Test("a note edited remotely whose folder was hard-deleted here is refiled to the default folder")
     func deletedFolderRefilesToDefault() async throws {
         let rig = try await orphanRig()
         try await rig.store.softDeleteFolder(clientId: "c-f1")
@@ -343,7 +343,7 @@ struct SyncEngineTests {
         #expect(await rig.hub.noteUpdates.last?.folderId == "fd")
     }
 
-    @Test("a note whose folder the hub tombstoned is refiled to the default folder (#335)")
+    @Test("a note whose folder the hub tombstoned is refiled to the default folder")
     func hubTombstonedFolderRefilesToDefault() async throws {
         let rig = try await orphanRig()
         var gone = folder("f1", updatedAt: t0.addingTimeInterval(15))
@@ -359,7 +359,7 @@ struct SyncEngineTests {
         #expect(rig.cursors.cursor(SyncEngine.noteCursorKey) == t0.addingTimeInterval(30 - SyncEngine.lookback))
     }
 
-    @Test("a note whose folder id was never seen still parks (#335)")
+    @Test("a note whose folder id was never seen still parks")
     func unseenFolderStillParks() async throws {
         let rig = try await orphanRig()
         await rig.hub.upsert(note("n2", folderId: "f-later", updatedAt: t0.addingTimeInterval(20)))
@@ -376,7 +376,7 @@ struct SyncEngineTests {
             workspaceId: nil, spaceId: nil, deletedAt: nil, createdAt: t0, updatedAt: t0)
     }
 
-    @Test("an install upgraded past a pulled folder tombstone catches up once (#557)")
+    @Test("an install upgraded past a pulled folder tombstone catches up once")
     func upgradeCatchesUpDeletedFolders() async throws {
         let defaults = try #require(UserDefaults(suiteName: "Catchup-\(UUID().uuidString)"))
         defaults.set(2, forKey: "sync.cursor.version")
@@ -408,7 +408,7 @@ struct SyncEngineTests {
         #expect(cursors.cursor(SyncEngine.noteCursorKey) == t0.addingTimeInterval(500 - SyncEngine.lookback))
     }
 
-    @Test("a pulled folder tombstone moves the notes held in it to the default folder (#553)")
+    @Test("a pulled folder tombstone moves the notes held in it to the default folder")
     func tombstoneMovesHeldNotes() async throws {
         let rig = try await orphanRig()
         var gone = folder("f1", updatedAt: t0.addingTimeInterval(15))
@@ -424,7 +424,7 @@ struct SyncEngineTests {
         #expect(await rig.hub.noteUpdates.last?.folderId == "fd")
     }
 
-    @Test("apply and refile are one store call: the note never lands synced without a folder (#554)")
+    @Test("apply and refile are one store call: the note never lands synced without a folder")
     func applyRefilesInOneSave() async throws {
         let rig = try await orphanRig()
         let result = try await rig.store.applyFromHub(note("n9", folderId: "f-gone"), refileOrphan: true)
@@ -434,7 +434,7 @@ struct SyncEngineTests {
         #expect(filed?.syncStatus == .pending)
     }
 
-    @Test("with several default folders a refile picks Personal, else the lowest sortOrder (#556)")
+    @Test("with several default folders a refile picks Personal, else the lowest sortOrder")
     func refilePicksOneDefault() async throws {
         let cases: [([HubFolder], String)] = [
             ([defaultFolder("fv", name: "Videos", sortOrder: 2), defaultFolder("fm", name: "Meetings", sortOrder: 1),
@@ -457,7 +457,7 @@ struct SyncEngineTests {
         }
     }
 
-    @Test("Use the hub's on a note whose hub folder is deleted files it in the default folder (#555)")
+    @Test("Use the hub's on a note whose hub folder is deleted files it in the default folder")
     func takeHubRefilesDeletedFolder() async throws {
         let rig = try await orphanRig()
         try await rig.store.editNote(clientId: "c-n1", content: "mine")
@@ -475,7 +475,7 @@ struct SyncEngineTests {
         #expect(taken?.syncStatus == .pending)
     }
 
-    @Test("the upgrade refiles a note an older build left without a folder when it pulled the tombstone (ios#566)")
+    @Test("the upgrade refiles a note an older build left without a folder when it pulled the tombstone")
     func upgradeRefilesHeldNoteLeftFolderless() async throws {
         let defaults = try #require(UserDefaults(suiteName: "Catchup-\(UUID().uuidString)"))
         let store = try NotesStore.inMemory()
@@ -507,7 +507,7 @@ struct SyncEngineTests {
         #expect(await hub.noteUpdates.last?.folderId == "fd")
     }
 
-    @Test("a note the hub moved out of a folder before deleting it takes the move, with no conflict (ios#566)")
+    @Test("a note the hub moved out of a folder before deleting it takes the move, with no conflict")
     func tombstoneDoesNotRefileOverHubMove() async throws {
         let rig = try await orphanRig()
         // Offline here: the desktop moves n1 from f1 into f2, then deletes f1.

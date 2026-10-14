@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// How much dictation history this iPhone keeps (ios#468). Trims are local
+/// How much dictation history this iPhone keeps. Trims are local
 /// only: the hub and the Mac keep every dictation.
 public enum HistoryRetention: String, CaseIterable, Identifiable, Sendable {
     case last15
@@ -41,7 +41,7 @@ public enum HistoryRetention: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// Reads the stored value. Builds before ios#468 stored a day count
+    /// Reads the stored value. Older builds stored a day count
     /// (0 = keep all, 30, 90): 30 becomes 7 days, the rest all. Unset is last 15.
     init(stored value: Any?) {
         switch value {

@@ -3,8 +3,8 @@ import Foundation
 /// Which Live Activity belongs to the take on screen. Each start makes a
 /// new `Take`; its `update` and `end` touch only the activity its own
 /// request started, so a late call on the `SerialTaskChain` cannot reach a
-/// leftover or a later take's activity (#204). A request that fails clears
-/// the take, so the next recording starts a new activity (#159).
+/// leftover or a later take's activity. A request that fails clears
+/// the take, so the next recording starts a new activity.
 @MainActor
 public final class DictationActivityTakes {
     /// One take's activity id, set by its request on the chain.

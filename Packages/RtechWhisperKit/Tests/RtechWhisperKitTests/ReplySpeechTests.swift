@@ -29,7 +29,7 @@ final class FakeSpeechRelay: @unchecked Sendable {
 struct ReplySpeechTests {
     let reply = ChatMessage(role: .assistant, content: "Hello there.")
 
-    @Test func requestIsTextOnlySoTheHubUsesSkippysVoice() throws {
+    @Test func requestIsTextOnlySoTheHubUsesItsOwnVoice() throws {
         let body = SpeechRelay.requestBody(text: "  Hi  ")
         let json = try #require(try JSONSerialization.jsonObject(with: body) as? [String: String])
         #expect(json == ["text": "Hi"])

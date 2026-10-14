@@ -14,7 +14,7 @@ extension KeyedHubSync: TranscriptionHubSyncing {
     }
 }
 
-/// Push-only sync of the dictation history (ios#468): the phone sends its own
+/// Push-only sync of the dictation history: the phone sends its own
 /// dictations through `batch-create` and pulls nothing. Its history is short
 /// and local; deletes and retention never reach the hub, which keeps every
 /// dictation for the Mac.

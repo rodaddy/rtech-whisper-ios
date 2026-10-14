@@ -9,7 +9,7 @@ import Foundation
 /// `maxWait` once that one has started. An ActivityKit call that stalls then
 /// holds the Live Activity back that long, not for good, but it is not
 /// cancelled: it may still land after operations enqueued behind it. Order
-/// holds only for operations that finish within `maxWait` (#204), so callers
+/// holds only for operations that finish within `maxWait`, so callers
 /// must not depend on it for correctness.
 @MainActor
 public final class SerialTaskChain {
@@ -39,7 +39,7 @@ public final class SerialTaskChain {
     }
 
     /// Waits for the last operation enqueued so far to finish. An earlier
-    /// one that outran `maxWait` may still be running (#206).
+    /// one that outran `maxWait` may still be running.
     public func drain() async {
         await tail?.finished.value
     }
@@ -48,7 +48,7 @@ public final class SerialTaskChain {
     /// never finishes, the task awaiting it never ends either: awaiting a
     /// task's value ignores cancellation, so there is nothing to cancel it
     /// with. One such task per stalled operation, which is itself leaked
-    /// already (#241).
+    /// already.
     private nonisolated static func wait(for previous: Task<Void, Never>, atMost limit: Duration) async {
         let once = Once()
         await withCheckedContinuation { continuation in

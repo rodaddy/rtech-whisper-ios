@@ -4,8 +4,8 @@ import Testing
 
 @testable import RtechWhisperKit
 
-// Dictionary sync with the Mac through the hub (protocol sections 5 and 8,
-// issue #409). Merge rules match desktop main: a pending local edit is never
+// Dictionary sync with the Mac through the hub (protocol sections 5 and 8).
+// Merge rules match desktop main: a pending local edit is never
 // overwritten, a re-served unchanged row writes nothing, and a tombstone
 // removes only the row it owns.
 
@@ -154,13 +154,13 @@ struct DictionarySyncTests {
     @Test("the first pull reads every row, and the cursor is the pass start minus L with no id")
     func firstPull() async throws {
         let rig = Rig()
-        await rig.hub.setRows([hubEntry("h1", word: "Proxmox"), hubEntry("h2", word: "Caddy", updatedAt: t0.addingTimeInterval(1))])
+        await rig.hub.setRows([hubEntry("h1", word: "Grafana"), hubEntry("h2", word: "Kafka", updatedAt: t0.addingTimeInterval(1))])
         let pass = t0.addingTimeInterval(1000)
         rig.clock.set(pass)
 
         try await rig.sync.pull()
 
-        #expect(rig.store.words == ["Proxmox", "Caddy"])
+        #expect(rig.store.words == ["Grafana", "Kafka"])
         #expect(rig.store.pendingCreates().isEmpty && rig.store.pendingUpdates().isEmpty)
         #expect(await rig.hub.listCalls == [.init(since: nil, sinceId: nil)])
         #expect(rig.cursors.cursor(DictionarySync.cursorKey) == pass.addingTimeInterval(-lookback))
@@ -186,32 +186,32 @@ struct DictionarySyncTests {
 
     @Test("a hub edit to a clean word applies; a pending local edit is never overwritten")
     func pendingEditSurvives() async throws {
-        let base = hubEntry("h1", word: "Proxmox")
-        let other = hubEntry("h2", word: "Caddy")
+        let base = hubEntry("h1", word: "Grafana")
+        let other = hubEntry("h2", word: "Kafka")
         let rig = Rig(entries: [Rig.synced(base), Rig.synced(other)])
-        try rig.store.edit("Proxmox", to: "Proxmox VE")
+        try rig.store.edit("Grafana", to: "Grafana VE")
 
         // The Mac renamed both words after this phone last pulled.
         await rig.hub.setRows([
-            hubEntry("h1", word: "PVE", updatedAt: t0.addingTimeInterval(10)),
-            hubEntry("h2", word: "Caddy2", updatedAt: t0.addingTimeInterval(10)),
+            hubEntry("h1", word: "GFN", updatedAt: t0.addingTimeInterval(10)),
+            hubEntry("h2", word: "Kafka2", updatedAt: t0.addingTimeInterval(10)),
         ])
         try await rig.sync.pull()
 
-        #expect(rig.store.words == ["Proxmox VE", "Caddy2"])
-        #expect(rig.store.pendingUpdates().map(\.word) == ["Proxmox VE"])
+        #expect(rig.store.words == ["Grafana VE", "Kafka2"])
+        #expect(rig.store.pendingUpdates().map(\.word) == ["Grafana VE"])
 
         // The push then sends the local edit, and it settles.
         try await rig.sync.push()
-        #expect(await rig.hub.updates.map(\.word) == ["Proxmox VE"])
-        #expect(await rig.hub.rows.first { $0.id == "h1" }?.word == "Proxmox VE")
+        #expect(await rig.hub.updates.map(\.word) == ["Grafana VE"])
+        #expect(await rig.hub.rows.first { $0.id == "h1" }?.word == "Grafana VE")
         #expect(rig.store.pendingUpdates().isEmpty)
     }
 
     @Test("a re-served row with the stamp this phone applied writes nothing, whatever the local copy holds")
     func reServeIsANoOp() async throws {
         // Stamped inside the lookback of the next pass, so that pass re-serves it.
-        let row = hubEntry("h1", word: "Proxmox", updatedAt: t0.addingTimeInterval(990))
+        let row = hubEntry("h1", word: "Grafana", updatedAt: t0.addingTimeInterval(990))
         let rig = Rig()
         await rig.hub.setRows([row])
         try await rig.sync.pull()
@@ -225,60 +225,60 @@ struct DictionarySyncTests {
         #expect(rig.persistence.saves == saves)
 
         // A local edit since that pull keeps its pending push.
-        try rig.store.edit("Proxmox", to: "Proxmox VE")
+        try rig.store.edit("Grafana", to: "Grafana VE")
         let edited = rig.store.entries
         #expect(rig.store.applyFromHub(row) == .unchanged)
         #expect(rig.store.entries == edited)
-        #expect(rig.store.pendingUpdates().map(\.word) == ["Proxmox VE"])
+        #expect(rig.store.pendingUpdates().map(\.word) == ["Grafana VE"])
     }
 
     // MARK: Tombstones
 
     @Test("a tombstone removes its own row; a re-served tombstone is a no-op")
     func tombstoneRemovesOwnRow() async throws {
-        let rig = Rig(entries: [Rig.synced(hubEntry("h1", word: "Proxmox")), Rig.synced(hubEntry("h2", word: "Caddy"))])
-        await rig.hub.setRows([hubEntry("h1", word: "Proxmox", updatedAt: t0.addingTimeInterval(990), deletedAt: t0.addingTimeInterval(990))])
+        let rig = Rig(entries: [Rig.synced(hubEntry("h1", word: "Grafana")), Rig.synced(hubEntry("h2", word: "Kafka"))])
+        await rig.hub.setRows([hubEntry("h1", word: "Grafana", updatedAt: t0.addingTimeInterval(990), deletedAt: t0.addingTimeInterval(990))])
 
         try await rig.sync.pull()
-        #expect(rig.store.words == ["Caddy"])
+        #expect(rig.store.words == ["Kafka"])
         #expect(rig.store.entries.count == 1)
 
         let saves = rig.persistence.saves
         rig.clock.set(t0.addingTimeInterval(1010))
         try await rig.sync.pull()
         #expect(await rig.hub.listCalls.last?.since == t0.addingTimeInterval(940))
-        #expect(rig.store.words == ["Caddy"])
+        #expect(rig.store.words == ["Kafka"])
         #expect(rig.persistence.saves == saves)
     }
 
     @Test("a tombstone never removes another row that spells the same word")
     func tombstoneLeavesOtherRows() async throws {
         // This phone holds the word under h2 (the Mac deleted h1 and made it again).
-        let rig = Rig(entries: [Rig.synced(hubEntry("h2", word: "Proxmox", updatedAt: t0.addingTimeInterval(3)))])
+        let rig = Rig(entries: [Rig.synced(hubEntry("h2", word: "Grafana", updatedAt: t0.addingTimeInterval(3)))])
         await rig.hub.setRows([
-            hubEntry("h1", word: "Proxmox", updatedAt: t0.addingTimeInterval(9), deletedAt: t0.addingTimeInterval(9)),
-            hubEntry("h2", word: "Proxmox", updatedAt: t0.addingTimeInterval(3)),
+            hubEntry("h1", word: "Grafana", updatedAt: t0.addingTimeInterval(9), deletedAt: t0.addingTimeInterval(9)),
+            hubEntry("h2", word: "Grafana", updatedAt: t0.addingTimeInterval(3)),
         ])
 
         try await rig.sync.pull()
 
-        #expect(rig.store.words == ["Proxmox"])
+        #expect(rig.store.words == ["Grafana"])
         #expect(rig.store.entries.map(\.cloudId) == ["h2"])
     }
 
     @Test("a word owned by one hub row is never moved to another hub row by its spelling")
     func noNaturalKeyRehoming() async throws {
-        let rig = Rig(entries: [Rig.synced(hubEntry("h1", word: "Proxmox"))])
-        await rig.hub.setRows([hubEntry("h9", word: "proxmox", updatedAt: t0.addingTimeInterval(20))])
+        let rig = Rig(entries: [Rig.synced(hubEntry("h1", word: "Grafana"))])
+        await rig.hub.setRows([hubEntry("h9", word: "grafana", updatedAt: t0.addingTimeInterval(20))])
 
         try await rig.sync.pull()
 
         // h1 keeps its word; h9 is tracked as its own row, shown once.
         #expect(rig.store.entries.map(\.cloudId) == ["h1", "h9"])
-        #expect(rig.store.words == ["Proxmox"])
+        #expect(rig.store.words == ["Grafana"])
 
         // Removing the word removes both rows, and both deletes reach the hub.
-        rig.store.remove("Proxmox")
+        rig.store.remove("Grafana")
         #expect(rig.store.words.isEmpty)
         #expect(Set(rig.store.pendingDeletes().compactMap(\.cloudId)) == ["h1", "h9"])
     }
@@ -286,15 +286,15 @@ struct DictionarySyncTests {
     @Test("the Mac re-adding a word before deleting the old row leaves the word on the phone")
     func macRecaseBetweenSyncs() async throws {
         // The Mac pushes creates before deletes: live h2 is stamped before tombstone h1.
-        let rig = Rig(entries: [Rig.synced(hubEntry("h1", word: "proxmox"))])
+        let rig = Rig(entries: [Rig.synced(hubEntry("h1", word: "grafana"))])
         await rig.hub.setRows([
-            hubEntry("h2", word: "Proxmox", updatedAt: t0.addingTimeInterval(10)),
-            hubEntry("h1", word: "proxmox", updatedAt: t0.addingTimeInterval(11), deletedAt: t0.addingTimeInterval(11)),
+            hubEntry("h2", word: "Grafana", updatedAt: t0.addingTimeInterval(10)),
+            hubEntry("h1", word: "grafana", updatedAt: t0.addingTimeInterval(11), deletedAt: t0.addingTimeInterval(11)),
         ])
 
         try await rig.sync.pull()
 
-        #expect(rig.store.words == ["Proxmox"])
+        #expect(rig.store.words == ["Grafana"])
         #expect(rig.store.entries.map(\.cloudId) == ["h2"])
     }
 
@@ -303,7 +303,7 @@ struct DictionarySyncTests {
     @Test("a new word is created on the hub and settles; a re-pull of it is a no-op")
     func pushCreates() async throws {
         let rig = Rig()
-        rig.store.add("Proxmox, Caddy")
+        rig.store.add("Grafana, Kafka")
         // The pass starts before the hub stamps the creates (t0 + 501 on), so
         // the next pass re-serves them.
         rig.clock.set(t0.addingTimeInterval(480))
@@ -312,7 +312,7 @@ struct DictionarySyncTests {
 
         let created = await rig.hub.creates
         #expect(created.count == 1)
-        #expect(created[0].map(\.word) == ["Proxmox", "Caddy"])
+        #expect(created[0].map(\.word) == ["Grafana", "Kafka"])
         #expect(rig.store.pendingCreates().isEmpty)
         #expect(rig.store.entries.allSatisfy { $0.syncStatus == .synced && $0.cloudId != nil })
 
@@ -327,8 +327,8 @@ struct DictionarySyncTests {
     @Test("a never-pushed word the Mac already has takes its hub id instead of doubling it")
     func firstSyncAdoptsHubWord() async throws {
         let rig = Rig()
-        rig.store.add("Proxmox")
-        await rig.hub.setRows([hubEntry("h1", word: "Proxmox")])
+        rig.store.add("Grafana")
+        await rig.hub.setRows([hubEntry("h1", word: "Grafana")])
 
         try await rig.sync.sync()
 
@@ -339,10 +339,10 @@ struct DictionarySyncTests {
 
     @Test("a delete goes to the hub and then the local tombstone is dropped")
     func pushDeletes() async throws {
-        let row = hubEntry("h1", word: "Proxmox")
+        let row = hubEntry("h1", word: "Grafana")
         let rig = Rig(entries: [Rig.synced(row)])
         await rig.hub.setRows([row])
-        rig.store.remove("Proxmox")
+        rig.store.remove("Grafana")
         #expect(rig.store.words.isEmpty)
         #expect(rig.store.pendingDeletes().map(\.cloudId) == ["h1"])
 
@@ -355,9 +355,9 @@ struct DictionarySyncTests {
 
     @Test("a pending local delete is not undone by a newer hub copy")
     func pendingDeleteSurvivesPull() async throws {
-        let rig = Rig(entries: [Rig.synced(hubEntry("h1", word: "Proxmox"))])
-        rig.store.remove("Proxmox")
-        await rig.hub.setRows([hubEntry("h1", word: "Proxmox!", updatedAt: t0.addingTimeInterval(10))])
+        let rig = Rig(entries: [Rig.synced(hubEntry("h1", word: "Grafana"))])
+        rig.store.remove("Grafana")
+        await rig.hub.setRows([hubEntry("h1", word: "Grafana!", updatedAt: t0.addingTimeInterval(10))])
 
         try await rig.sync.pull()
 
@@ -368,9 +368,9 @@ struct DictionarySyncTests {
     @Test("a word deleted while its create was in flight is deleted on the hub too")
     func deleteDuringCreate() async throws {
         let rig = Rig()
-        rig.store.add("Proxmox")
+        rig.store.add("Grafana")
         let store = rig.store
-        await rig.hub.setDuringWrite { await MainActor.run { store.remove("Proxmox") } }
+        await rig.hub.setDuringWrite { await MainActor.run { store.remove("Grafana") } }
 
         try await rig.sync.push()
 
@@ -381,16 +381,16 @@ struct DictionarySyncTests {
 
     @Test("an edit made while its update was in flight stays pending")
     func editDuringUpdate() async throws {
-        let row = hubEntry("h1", word: "Proxmox")
+        let row = hubEntry("h1", word: "Grafana")
         let rig = Rig(entries: [Rig.synced(row)])
         await rig.hub.setRows([row])
-        try rig.store.edit("Proxmox", to: "Proxmox VE")
+        try rig.store.edit("Grafana", to: "Grafana VE")
         let store = rig.store
-        await rig.hub.setDuringWrite { await MainActor.run { try? store.edit("Proxmox VE", to: "PVE") } }
+        await rig.hub.setDuringWrite { await MainActor.run { try? store.edit("Grafana VE", to: "GFN") } }
 
         try await rig.sync.push()
 
-        #expect(rig.store.pendingUpdates().map(\.word) == ["PVE"])
+        #expect(rig.store.pendingUpdates().map(\.word) == ["GFN"])
     }
 
     // MARK: Wiring and storage
@@ -398,7 +398,7 @@ struct DictionarySyncTests {
     @Test("the sync engine's pass runs the dictionary step")
     func engineRunsDictionary() async throws {
         let rig = Rig()
-        rig.store.add("Proxmox")
+        rig.store.add("Grafana")
         let engine = SyncEngine(
             hub: FakeSyncHub(), store: try NotesStore.inMemory(), cursors: rig.cursors, dictionary: rig.sync)
 
@@ -423,14 +423,14 @@ struct DictionarySyncTests {
         let suite = "DictionarySync-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        defaults.set(["Proxmox", "Caddy"], forKey: UserDefaultsDictionaryPersistence.legacyKey)
+        defaults.set(["Grafana", "Kafka"], forKey: UserDefaultsDictionaryPersistence.legacyKey)
 
         let store = DictionaryStore(persistence: UserDefaultsDictionaryPersistence(defaults: defaults))
-        #expect(store.words == ["Proxmox", "Caddy"])
-        #expect(store.pendingCreates().map(\.word) == ["Proxmox", "Caddy"])
+        #expect(store.words == ["Grafana", "Kafka"])
+        #expect(store.pendingCreates().map(\.word) == ["Grafana", "Kafka"])
 
-        store.remove("Caddy")
+        store.remove("Kafka")
         let reloaded = DictionaryStore(persistence: UserDefaultsDictionaryPersistence(defaults: defaults))
-        #expect(reloaded.words == ["Proxmox"])
+        #expect(reloaded.words == ["Grafana"])
     }
 }

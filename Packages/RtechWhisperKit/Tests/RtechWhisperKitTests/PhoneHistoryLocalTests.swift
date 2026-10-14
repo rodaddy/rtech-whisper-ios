@@ -28,7 +28,7 @@ private struct Rig {
     }
 }
 
-// ios#468: the phone pushes its own dictations and keeps a short local history.
+// The phone pushes its own dictations and keeps a short local history.
 @Suite("Phone history is push-only and local")
 struct PhoneHistoryLocalTests {
     @Test func syncPushesPendingRowsAndPullsNothing() async throws {

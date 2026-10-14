@@ -3,7 +3,7 @@ import Observation
 
 /// `POST /api/voice/upstream/omnivoice/synthesize` (hub protocol section
 /// 10.2), the iPhone path: only `text` is sent, so the hub speaks it in
-/// Skippy's server-side voice. Returns the reply's WAV bytes.
+/// its own server-side voice. Returns the reply's WAV bytes.
 public enum SpeechRelay {
     public static let path = "api/voice/upstream/omnivoice/synthesize"
     /// The relay takes 1...2000 characters after trimming.

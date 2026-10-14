@@ -1,6 +1,6 @@
 import AppIntents
 
-/// Brain dump (ios#484): opens rTech Whisper on the Brain dump tab with the
+/// Brain dump: opens rTech Whisper on the Brain dump tab with the
 /// box focused. Reachable from the Action button, Siri, Spotlight, a Home
 /// Screen shortcut, and the Control Center control. It does not record.
 ///
