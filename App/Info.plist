@@ -37,6 +37,8 @@
 	<string>rTech Whisper uses speech recognition to turn your dictation into text.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<key>RTWHubBaseURL</key>
+	<string>$(RTW_HUB_BASE_URL)</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
