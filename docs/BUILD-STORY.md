@@ -4,7 +4,7 @@ Sources for this page: the private development repository's full history (248
 commits up to the 2026-10-13 export, 140 of them non-merge, plus later
 commits), its issues and pull requests, the CHANGELOG, the test suite and the
 sync-protocol document in `docs/`. This public repository holds the export
-only, so its own `git log` is three commits.
+only, so its own `git log` starts at that export.
 
 ## The problem and the first version (2026-09-29)
 
